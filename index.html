@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>SAKH Voice Lab</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  padding: 25px 15px;
+  background: #0b1220;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+
+.container {
+  max-width: 560px;
+  margin: auto;
+  background: #172438;
+  padding: 25px;
+  border-radius: 20px;
+  border: 1px solid #2b405b;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.logo {
+  font-size: 35px;
+  font-weight: bold;
+  color: #72e0bd;
+}
+
+h1 {
+  letter-spacing: 4px;
+}
+
+.subtitle {
+  color: #aab8ca;
+  line-height: 1.5;
+}
+
+h3 {
+  font-size: 13px;
+  color: #aab8ca;
+  letter-spacing: 1px;
+  margin-top: 25px;
+}
+
+input, select {
+  width: 100%;
+  padding: 13px;
+  margin: 7px 0 14px;
+  border-radius: 9px;
+  border: 1px solid #344962;
+  background: #0d1929;
+  color: white;
+}
+
+.types {
+  display: flex;
+  gap: 10px;
+}
+
+.type {
+  flex: 1;
+  padding: 15px 8px;
+  background: #0d1929;
+  border: 1px solid #344962;
+  border-radius: 10px;
+  color: white;
+  cursor: pointer;
+}
+
+.type.active {
+  border-color: #72e0bd;
+  background: #174035;
+}
+
+.record-area {
+  text-align: center;
+  padding: 25px 0;
+  border-top: 1px solid #344962;
+  border-bottom: 1px solid #344962;
+}
+
+.record {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  border: 8px solid #31584e;
+  background: #72e0bd;
+  color: #09251e;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.record.recording {
+  background: #ff8585;
+  border-color: #683d43;
+}
+
+.timer {
+  font-size: 27px;
+  margin: 15px;
+}
+
+.hint {
+  color: #aab8ca;
+  font-size: 13px;
+}
+
+audio {
+  width: 100%;
+  margin-top: 15px;
+}
+
+.consent {
+  display: flex;
+  gap: 10px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #aab8ca;
+  margin-top: 20px;
+}
+
+.consent input {
+  width: 18px;
+  flex-shrink: 0;
+}
+
+.submit {
+  width: 100%;
+  padding: 16px;
+  border: none;
+  border-radius: 10px;
+  background: #72e0bd;
+  color: #09251e;
+  font-weight: bold;
+  font-size: 15px;
+  margin-top: 20px;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+.status {
+  display: none;
+  padding: 13px;
+  border-radius: 10px;
+  margin-top: 15px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.status.info {
+  display: block;
+  background: #18314a;
+}
+
+.status.success {
+  display: block;
+  background: #164234;
+}
+
+.status.error {
+  display: block;
+  background: #48272c;
+}
+
+footer {
+  color: #8493a8;
+  font-size: 11px;
+  text-align: center;
+  margin-top: 20px;
+  line-height: 1.5;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<header>
+  <div class="logo">S</div>
+  <h1>SAKH VOICE LAB</h1>
+  <p class="subtitle">
+    Help SAKH learn how people naturally speak.<br>
+    Contribute your voice to wake-word research.
+  </p>
+</header>
+
+<h3>1. SELECT RECORDING TYPE</h3>
+
+<div class="types">
+  <button class="type active" data-type="wake_word">
+    🎙 Wake Word<br>
+    <small>Hello Sakh</small>
+  </button>
+
+  <button class="type" data-type="negative">
+    💬 Everyday Speech<br>
+    <small>Normal speech</small>
+  </button>
+</div>
+
+<h3>2. RECORDING DETAILS</h3>
+
+<label>Invitation Code *</label>
+<input id="accessCode" type="password" autocomplete="off"
+       placeholder="Enter invitation code">
+
+<label>Participant Code (optional)</label>
+<input id="participantCode" placeholder="FRIEND01">
+
+<label>Language</label>
+<select id="language">
+  <option>Not specified</option>
+  <option>English</option>
+  <option>Nepali</option>
+  <option>Dutch</option>
+  <option>Hindi</option>
+  <option>Other / mixed</option>
+</select>
+
+<label>Country</label>
+<input id="country" placeholder="Netherlands">
+
+<label>Device</label>
+<select id="device">
+  <option>Not specified</option>
+  <option>iPhone</option>
+  <option>Android phone</option>
+  <option>Windows computer</option>
+  <option>Mac</option>
+  <option>Other</option>
+</select>
+
+<label>Environment</label>
+<select id="environment">
+  <option>Not specified</option>
+  <option>Quiet room</option>
+  <option>Outdoor</option>
+  <option>Noisy environment</option>
+  <option>Vehicle / transport</option>
+</select>
+
+<div class="record-area">
+
+<h3>3. RECORD YOUR VOICE</h3>
+
+<button class="record" id="recordButton">
+  TAP TO<br>RECORD
+</button>
+
+<div class="timer" id="timer">00:00</div>
+
+<p class="hint" id="hint">
+  Tap to record. Your browser should ask for microphone permission.
+</p>
+
+<audio id="preview" controls hidden></audio>
+
+</div>
+
+<label class="consent">
+  <input type="checkbox" id="consent">
+  <span>
+    I agree to contribute this voice recording to SAKH Voice Lab
+    for wake-word and speech-recognition research and model improvement.
+    I understand that it will be stored in the organiser's private
+    Google Drive.
+  </span>
+</label>
+
+<button class="submit" id="submitButton" disabled>
+  SUBMIT RECORDING
+</button>
+
+<div class="status" id="status"></div>
+
+<footer>
+  SAKH Voice Lab · Only record voices for which you have permission.
+  Avoid private conversations and sensitive personal information.
+</footer>
+
+</div>
+
+<iframe name="sakhResponseFrame" style="display:none"></iframe>
+
+<script>
+
+// REPLACE THIS WITH YOUR DEPLOYED APPS SCRIPT URL.
+const APPS_SCRIPT_URL =
+"PASTE_YOUR_APPS_SCRIPT_WEB_APP_EXEC_URL_HERE";
+
+const MAX_SECONDS = 8;
+
+let sampleType = "wake_word";
+let recorder = null;
+let stream = null;
+let chunks = [];
+let recordingBlob = null;
+let recordingMime = "";
+let recordingDuration = 0;
+let startedAt = 0;
+let timerInterval = null;
+let stopTimeout = null;
+let requestToken = "";
+let responseTimeout = null;
+
+const $ = id => document.getElementById(id);
+
+function status(message, type) {
+  $("status").textContent = message;
+  $("status").className = "status " + type;
+}
+
+document.querySelectorAll(".type").forEach(button => {
+  button.addEventListener("click", () => {
+    document.querySelectorAll(".type").forEach(b =>
+      b.classList.remove("active")
+    );
+
+    button.classList.add("active");
+    sampleType = button.dataset.type;
+    resetRecording();
+
+    $("hint").textContent =
+      sampleType === "wake_word"
+        ? 'Say "Hello Sakh" naturally.'
+        : "Speak naturally without saying Hello Sakh.";
+  });
+});
+
+function getSupportedMime() {
+  const types = [
+    "audio/webm;codecs=opus",
+    "audio/webm",
+    "audio/mp4",
+    "audio/ogg;codecs=opus"
+  ];
+
+  for (const type of types) {
+    if (MediaRecorder.isTypeSupported(type)) return type;
+  }
+
+  return "";
+}
+
+async function startRecording() {
+  $("status").className = "status";
+
+  if (!navigator.mediaDevices ||
+      !navigator.mediaDevices.getUserMedia) {
+    status(
+      "Microphone access is unavailable. Open this HTTPS page directly in Safari or Chrome.",
+      "error"
+    );
+    return;
+  }
+
+  if (!window.MediaRecorder) {
+    status("Your browser does not support audio recording.", "error");
+    return;
+  }
+
+  try {
+
+    // Called directly after the user's tap.
+    // This allows the browser to request microphone permission.
+    stream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true
+      }
+    });
+
+    const mime = getSupportedMime();
+
+    recorder = mime
+      ? new MediaRecorder(stream, { mimeType: mime })
+      : new MediaRecorder(stream);
+
+    chunks = [];
+
+    recorder.ondataavailable = event => {
+      if (event.data && event.data.size) {
+        chunks.push(event.data);
+      }
+    };
+
+    recorder.onstop = () => {
+
+      recordingDuration = Math.min(
+        MAX_SECONDS,
+        (Date.now() - startedAt) / 1000
+      );
+
+      recordingMime =
+        (recorder.mimeType || mime || "audio/webm")
+        .split(";")[0].toLowerCase();
+
+      recordingBlob = new Blob(chunks, {
+        type: recorder.mimeType || mime || "audio/webm"
+      });
+
+      stream.getTracks().forEach(track => track.stop());
+      stream = null;
+
+      $("preview").src = URL.createObjectURL(recordingBlob);
+      $("preview").hidden = false;
+
+      $("submitButton").disabled =
+        !recordingBlob.size || !$("consent").checked;
+
+      $("hint").textContent =
+        "Listen to your recording before submitting.";
+
+      resetButton();
+    };
+
+    recorder.start(250);
+
+    startedAt = Date.now();
+
+    $("recordButton").classList.add("recording");
+    $("recordButton").innerHTML = "TAP TO<br>STOP";
+
+    $("hint").textContent =
+      "Recording... Tap again to stop.";
+
+    timerInterval = setInterval(updateTimer, 200);
+
+    stopTimeout = setTimeout(
+      stopRecording,
+      MAX_SECONDS * 1000
+    );
+
+  } catch (error) {
+
+    let message = "Microphone error: " + error.name + ". ";
+
+    if (error.name === "NotAllowedError") {
+      message += "Microphone permission was denied or blocked. Check your browser settings.";
+    } else if (error.name === "NotFoundError") {
+      message += "No microphone was found.";
+    } else if (error.name === "NotReadableError") {
+      message += "The microphone may be in use by another application.";
+    } else {
+      message += error.message || "Please check your microphone.";
+    }
+
+    status(message, "error");
+
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+      stream = null;
+    }
+
+    resetButton();
+  }
+}
+
+function stopRecording() {
+  if (recorder && recorder.state === "recording") {
+    recorder.stop();
+  }
+
+  clearInterval(timerInterval);
+  clearTimeout(stopTimeout);
+}
+
+function updateTimer() {
+  const seconds = Math.min(
+    MAX_SECONDS,
+    Math.floor((Date.now() - startedAt) / 1000)
+  );
+
+  $("timer").textContent =
+    "00:" + String(seconds).padStart(2, "0");
+}
+
+function resetButton() {
+  $("recordButton").classList.remove("recording");
+  $("recordButton").innerHTML = "TAP TO<br>RECORD";
+}
+
+function resetRecording() {
+  if (recorder && recorder.state === "recording") {
+    recorder.stop();
+  }
+
+  clearInterval(timerInterval);
+  clearTimeout(stopTimeout);
+
+  if (stream) {
+    stream.getTracks().forEach(track => track.stop());
+    stream = null;
+  }
+
+  recorder = null;
+  recordingBlob = null;
+  recordingDuration = 0;
+  chunks = [];
+
+  $("preview").pause();
+  $("preview").removeAttribute("src");
+  $("preview").hidden = true;
+
+  $("timer").textContent = "00:00";
+  $("submitButton").disabled = true;
+
+  resetButton();
+  $("status").className = "status";
+}
+
+function toBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      const result = String(reader.result);
+      resolve(result.substring(result.indexOf(",") + 1));
+    };
+
+    reader.onerror = () =>
+      reject(new Error("Could not read the recording."));
+
+    reader.readAsDataURL(blob);
+  });
+}
+
+async function submitRecording() {
+
+  if (!recordingBlob) {
+    return status("Please record first.", "error");
+  }
+
+  if (!$("consent").checked) {
+    return status("Please confirm the consent checkbox.", "error");
+  }
+
+  if (!$("accessCode").value.trim()) {
+    return status("Enter your invitation code.", "error");
+  }
+
+  if (!APPS_SCRIPT_URL.startsWith("https://script.google.com/") ||
+      !APPS_SCRIPT_URL.endsWith("/exec")) {
+    return status("The organiser has not configured the backend URL.", "error");
+  }
+
+  $("submitButton").disabled = true;
+  $("recordButton").disabled = true;
+
+  status("Preparing your recording...", "info");
+
+  try {
+
+    const base64 = await toBase64(recordingBlob);
+
+    const payload = {
+      accessCode: $("accessCode").value.trim(),
+      participantCode: $("participantCode").value.trim(),
+      sampleType: sampleType,
+      consent: $("consent").checked,
+      base64: base64,
+      mimeType: recordingMime,
+      durationSeconds: Number(recordingDuration.toFixed(2)),
+      language: $("language").value,
+      country: $("country").value.trim(),
+      device: $("device").value,
+      environment: $("environment").value
+    };
+
+    requestToken =
+      (crypto.randomUUID
+        ? crypto.randomUUID()
+        : String(Date.now()) + Math.random());
+
+    const form = document.createElement("form");
+
+    form.method = "POST";
+    form.action = APPS_SCRIPT_URL;
+    form.target = "sakhResponseFrame";
+    form.enctype = "application/x-www-form-urlencoded";
+    form.style.display = "none";
+
+    const payloadInput = document.createElement("input");
+    payloadInput.type = "hidden";
+    payloadInput.name = "payload";
+    payloadInput.value = JSON.stringify(payload);
+
+    const tokenInput = document.createElement("input");
+    tokenInput.type = "hidden";
+    tokenInput.name = "requestToken";
+    tokenInput.value = requestToken;
+
+    form.appendChild(payloadInput);
+    form.appendChild(tokenInput);
+
+    document.body.appendChild(form);
+    form.submit();
+    form.remove();
+
+    status("Uploading your recording to SAKH's private Drive...", "info");
+
+    clearTimeout(responseTimeout);
+
+    responseTimeout = setTimeout(() => {
+      if (requestToken) {
+        status(
+          "The upload was sent, but confirmation has not arrived. Check Drive before submitting again.",
+          "info"
+        );
+
+        $("submitButton").disabled = false;
+        $("recordButton").disabled = false;
+      }
+    }, 20000);
+
+  } catch (error) {
+
+    status(error.message, "error");
+
+    $("submitButton").disabled = false;
+    $("recordButton").disabled = false;
+  }
+}
+
+window.addEventListener("message", event => {
+
+  const data = event.data;
+
+  if (!data ||
+      data.type !== "SAKH_VOICE_RESULT" ||
+      data.requestToken !== requestToken) {
+    return;
+  }
+
+  requestToken = "";
+
+  clearTimeout(responseTimeout);
+
+  $("recordButton").disabled = false;
+
+  if (data.result && data.result.success) {
+
+    status(data.result.message, "success");
+
+    resetRecording();
+
+    $("accessCode").value = "";
+    $("consent").checked = false;
+
+  } else {
+
+    status(
+      data.result && data.result.message
+        ? data.result.message
+        : "The recording could not be saved.",
+      "error"
+    );
+
+    $("submitButton").disabled = false;
+  }
+});
+
+$("recordButton").addEventListener("click", () => {
+
+  if (recorder && recorder.state === "recording") {
+    stopRecording();
+  } else {
+    startRecording();
+  }
+
+});
+
+$("submitButton").addEventListener(
+  "click",
+  submitRecording
+);
+
+$("consent").addEventListener("change", () => {
+
+  $("submitButton").disabled =
+    !(recordingBlob && $("consent").checked);
+
+});
+
+</script>
+
+</body>
+</html>
